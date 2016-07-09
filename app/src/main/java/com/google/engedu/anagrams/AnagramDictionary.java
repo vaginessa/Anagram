@@ -16,11 +16,12 @@ public class AnagramDictionary {
 
     private static final int MIN_NUM_ANAGRAMS = 5;
     private static final int DEFAULT_WORD_LENGTH = 3;
-    private static final int MAX_WORD_LENGTH = 7;
+    private static final int MAX_WORD_LENGTH = 5;
     private Random random = new Random();
     private HashSet<String> wordSet = new HashSet<String>();
     private ArrayList<String> wordList = new ArrayList<>();
     private HashMap<String, ArrayList<String>> lettersToWord = new HashMap<String, ArrayList<String>>();
+    private HashMap<Integer, ArrayList<String>> sizeToWords = new HashMap<>();
 
     public AnagramDictionary(InputStream wordListStream) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(wordListStream));
@@ -30,6 +31,13 @@ public class AnagramDictionary {
             String word = line.trim();
             wordSet.add(word);
             wordList.add(word);
+            if (sizeToWords.get(word.length()) == null){
+                ArrayList<String> temp = new ArrayList<>();
+                temp.add(word);
+                sizeToWords.put(word.length(),temp);
+            }
+            else
+                sizeToWords.get(word.length()).add(word);
 
             // Add word to letterToWord
             String word_sorted = sortLetters(word);
@@ -44,10 +52,6 @@ public class AnagramDictionary {
     }
 
     public boolean isGoodWord(String word, String base) {
-        Log.d("Answer","Word: " + word);
-        Log.d("Answer","Base: " + base);
-        Log.d("Answer","Result of contains (String): " + word.contains(base));
-        Log.d("Answer","Result of contains (HashSet): "+ wordSet.contains(word));
         if (word.contains(base))
             return false;
         else if (!wordSet.contains(word))
@@ -74,8 +78,13 @@ public class AnagramDictionary {
         char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
         for (char c : alphabet){
             ArrayList<String> temp = getAnagrams(sortLetters(sorted + c));
-            if (temp != null){
+            if (temp != null)
                 result.addAll(temp);
+        }
+        for (int i = 0; i < result.size(); i++){
+            if (result.get(i).contains(word)){
+                result.remove(i);
+                i--;
             }
         }
         return result;
@@ -84,10 +93,12 @@ public class AnagramDictionary {
     public String pickGoodStarterWord() {
         Random rand = new Random();
         int i = rand.nextInt(9999+1);
-        while (lettersToWord.get(sortLetters(wordList.get(i))).size() < MIN_NUM_ANAGRAMS){
+        while ((getAnagramsWithOneMoreLetter(sortLetters(wordList.get(i))).size() < MIN_NUM_ANAGRAMS)
+                && (wordList.get(i).length() < DEFAULT_WORD_LENGTH
+                || wordList.get(i).length() > MAX_WORD_LENGTH)){
             i = ++i%wordList.size();
         }
-        Log.d("Answer", getAnagramsWithOneMoreLetter(wordList.get(i)).toString());
+        Log.d("Answer", getAnagramsWithOneMoreLetter(sortLetters(wordList.get(i))).toString());
         return wordList.get(i);
     }
 }
