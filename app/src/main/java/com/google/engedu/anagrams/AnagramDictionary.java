@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +37,10 @@ public class AnagramDictionary {
                 ArrayList<String> values = new ArrayList<String>();
                 values.add(word);
                 lettersToWord.put(word_sorted, values);
+
+            // If sorted word already exists
+            } else {
+                lettersToWord.get(word_sorted).add(word);
 
             }
         }
